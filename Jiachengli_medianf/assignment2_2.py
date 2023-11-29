@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
+from playsound import playsound
 """second part: change the filter to the spline filter
     
     Args:
@@ -22,8 +23,8 @@ import matplotlib.pyplot as plt
 
 fs_2, audio_2 = wavfile.read("degraded.wav")
 fsc_2, audioc_2 = wavfile.read("clean.wav")
-audio_2 = audio_2 / 32678
-audioc_2 = audioc_2 / 32678
+audio_2 = audio_2 / 32768
+audioc_2 = audioc_2 / 32768
 print(fs_2)
 t_2 = range(len(audio_2))
 print(audio_2)
@@ -115,10 +116,13 @@ print(2 * audio_2)
 
 MSE = np.sum((((audio_2 * 2) - audioc_2) ** 2)) / COUNT
 print("MSE = ", MSE)
-f = wave.open('Csrestored.wav.wav','wb')
+
+audio_2 = audio_2 * 32768
+f = wave.open('Csrestored.wav','w')
 f.setnchannels(1)
 f.setsampwidth(2)
-f.setframerate(fs_2)
-f.writeframes(audio_2)
+f.setframerate(8192)
+f.writeframes(audio_2.astype(np.int16))
 
-
+f.close()
+playsound('Mrestored.wav')

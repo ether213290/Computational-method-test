@@ -7,10 +7,11 @@ import time
 import unittest
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from playsound import playsound
 fs, audio = wavfile.read("degraded.wav")
 fsc, audioc = wavfile.read("clean.wav")
-audio = audio / 32678
-audioc = audioc / 32678
+audio = audio / 32768
+audioc = audioc / 32768
 print(fs)
 t = range(len(audio))
 
@@ -71,55 +72,70 @@ def mid_filter(x, d):
 
 block_size = 3
 actual_error = 0
-COUNT = 0
-
+MSE_order = []
+block = []
 ''''calculate the execution time and restore the audio'''
+for block_size in range (3 , 21, 2): 
+    COUNT = 0
+    start = time.perf_counter()
 
-start = time.perf_counter()
+    for i in tqdm(range (0, len(detection))):
+        if (detection[i] != 0):
+            COUNT = COUNT + 1
+            total_l  = 4
+            s = max((i - block_size // 2) , 0)
+            e = min((i + block_size // 2), len(detection))
+            #print("s = ",s)
+            #print("e = ",e)
+            pre_x = audio[s : e]
+            #audio[i] = np.mean(mid_filter(pre_x, block_size))
+            array =  mid_filter(pre_x, block_size)
+            audio[i] = array[block_size // 2 - 1]
 
-for i in tqdm(range (0, len(detection))):
-    if (detection[i] != 0):
-        COUNT = COUNT + 1
-        total_l  = 4
-        s = max((i - total_l // 2) , 0)
-        e = min((i + total_l // 2), len(detection))
-        #print("s = ",s)
-        #print("e = ",e)
-        pre_x = audio[s : e]
-        #audio[i] = np.mean(mid_filter(pre_x, block_size))
-        array =  mid_filter(pre_x, block_size)
-        audio[i] = array[total_l // 2 - 1]
+    end = time.perf_counter()
+    elapsed = end - start
+    print(f'execution time  = {elapsed}')
+    print(COUNT)
+    print("\n" + 'DONE')
 
-end = time.perf_counter()
-elapsed = end - start
-print(f'execution time  = {elapsed}')
-print(COUNT)
-print("\n" + 'DONE')
+    ''''plot the figure of restored audio and ERROR to check whether it is restored correctly'''
 
-''''plot the figure of restored audio and ERROR to check whether it is restored correctly'''
+    '''print(audio)
+    print(min(audio))
+    plt.subplot(2,1,1)
+    plt.plot(t, audio)
+    plt.ylabel('Amplitude')
+    audio_error = 2 * audio - audioc
+    plt.subplot(2,1,2)
+    plt.plot(t, audio_error)
+    plt.xlabel('Sampling point')
+    plt.ylabel('Amplitude')
+    plt.show()
+    print(2 * audio)'''
 
-print(audio)
-print(min(audio))
-plt.subplot(2,1,1)
-plt.plot(t, audio)
-plt.ylabel('Amplitude')
-audio_error = 2 * audio - audioc
-plt.subplot(2,1,2)
-plt.plot(t, audio_error)
+    ''''calculate the MSE'''
+
+    MSE = np.sum((((audio * 2) - audioc) ** 2)) / COUNT
+    print("MSE = ", MSE)
+    MSE_order.append(MSE)
+    block.append(block_size)
+
+print("MSE = ", MSE_order)
+print("b = ", block)
+plt.plot(block, MSE_order)
 plt.xlabel('Sampling point')
 plt.ylabel('Amplitude')
 plt.show()
-print(2 * audio)
 
-''''calculate the MSE'''
-
-MSE = np.sum((((audio * 2) - audioc) ** 2)) / COUNT
-print("MSE = ", MSE)
-f = wave.open('Mrestored.wav','wb')
+audio = audio * 32768
+f = wave.open('Mrestored.wav','w')
 f.setnchannels(1)
 f.setsampwidth(2)
 f.setframerate(fs)
-f.writeframes(audio)
+f.writeframes(audio.astype(np.int16))
+
+f.close()
+playsound('Mrestored.wav')
 
 ''''unit test to check whether the Median filter is working well'''
 
