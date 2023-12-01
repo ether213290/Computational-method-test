@@ -22,7 +22,7 @@ For more details check [here](https://github.com/bndr/pipreqs)
 
 Afer installing all required packages you can run the demo file simply by typing:
 ```sh
-python demo_audio_restoration.py
+python assignment2.py
 ```
 ---
 
