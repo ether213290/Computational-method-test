@@ -53,6 +53,10 @@ In the Figure_5, the first part of this figure contains the orignal part signal 
 
 <img src="Figure_3.png" width="350">
 
+For the median filter, different lengths were explored to test the effectiveness of the restoration. In particular, lengths changed from 5 to 31 with a duration 2 were tested and 11 was observed to deliver the lowest MSE, as shown in the figure below.
+
+<img src="Figure_6.png" width="350">
+
 ```sh
  filter  = 5
  MSE = 0.013569671723213213

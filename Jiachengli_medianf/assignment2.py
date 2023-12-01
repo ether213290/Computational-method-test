@@ -38,7 +38,6 @@ for i in range (0, (len(audio_error) - 1)):
     else:
         detect = 1
     detection.append(detect)
-print(detection)
 
 def mid_filter(x, d):
     """take several numbers, return several middle numbers
